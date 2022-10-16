@@ -25,7 +25,7 @@ def query(payload):
     return response.json()
 
 # Input paths
-parent_dir = Path(__file__).resolve().parents[0]
+parent_dir = Path(__file__).resolve().parents[0] / "context"
 training_question_file = parent_dir / "question.json"
 training_context_file = parent_dir / "context.json"
 random_img_for_clip = parent_dir / "img.jpg"
