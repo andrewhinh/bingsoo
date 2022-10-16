@@ -14,10 +14,9 @@ from transformers import CLIPProcessor, CLIPModel
 
 
 # Variables
-# HF Token
+# HF Token / OpenAI API Key
 load_dotenv()
 HF_TOKEN = os.getenv("HF_TOKEN")
-# OpenAI API Key
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # OpenAI GPT-3 config
@@ -25,13 +24,13 @@ context_id = 100  # Random
 question_id = 1005  # Random
 n_shot = 1
 n_ensemble = 1
-max_token_gpt = 4097
+gpt_max_tokens = 4097
 
 # Computing similarity config
 encoder = "openai/clip-vit-base-patch16"
 
 # Context files
-parent_dir = Path(__file__).resolve().parents[0]
+parent_dir = Path(__file__).resolve().parents[0] / "context"
 training_train_idx_file = parent_dir / "train_idx.json"
 training_context_file = parent_dir / "context.json"
 training_question_features = parent_dir / "question_feature.npy"
@@ -216,7 +215,7 @@ class Pipeline:
         max_tokens = 512
         response = openai.Completion.create(
             model="text-davinci-002",
-            prompt="Extract the exam dates, keywords, and names from this syllabus:\n\n"+context[:max_token_gpt - max_tokens],
+            prompt="Extract the exam dates, keywords, and names from this syllabus:\n\n"+context[:gpt_max_tokens - max_tokens],
             temperature=0,
             max_tokens=max_tokens,
             top_p=1.0,
