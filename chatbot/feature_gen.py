@@ -26,13 +26,18 @@ def query(payload):
 
 # Input paths
 parent_dir = Path(__file__).resolve().parents[0] / "context"
-training_question_file = parent_dir / "question.json"
-training_context_file = parent_dir / "context.json"
 random_img_for_clip = parent_dir / "img.jpg"
 
+chatbot_dir = "chatbot"
+class_dir = "class"
+training_chatbot_question_file = parent_dir / chatbot_dir / "question.json"
+training_context_file = parent_dir / chatbot_dir / "context.json"
+training_class_question_file = parent_dir / class_dir / "question.json"
+
 # Output paths
-training_question_features = parent_dir / "question_feature.npy"
-training_context_features = parent_dir / "context_feature.npy"
+training_chatbot_question_features = parent_dir / chatbot_dir / "question_feature.npy"
+training_context_features = parent_dir / chatbot_dir / "context_feature.npy"
+training_class_question_features = parent_dir / class_dir / "question_feature.npy"
 
 # CLIP config
 encoder = "openai/clip-vit-base-patch16"
@@ -42,25 +47,35 @@ clip_processor = CLIPProcessor.from_pretrained(encoder)
 
 # Main function
 def main():
-    question = json.load(open(training_question_file, "r"))
-    if isinstance(question, dict):
-        question = question["questions"][0]['question']
+    chatbot_questions = json.load(open(training_chatbot_question_file, "r"))
+    if isinstance(chatbot_questions, dict):
+        temp = chatbot_questions["questions"]
+        chatbot_questions = [temp[idx]['question'] for idx in range(len(temp))]
+        
+    contexts = json.load(open(training_context_file, "r"))
+    if isinstance(contexts, dict):
+        temp = contexts["context_examples"]
+        contexts = [temp[idx]['context'] for idx in range(len(temp))]
 
-    context = json.load(open(training_context_file, "r"))
-    if isinstance(context, dict):
-        context = context["context_examples"][0]['context']
+    class_questions = json.load(open(training_chatbot_question_file, "r"))
+    if isinstance(class_questions, dict):
+        temp = class_questions["questions"]
+        class_questions = [temp[idx]['question'] for idx in range(len(temp))]
 
-    summarized_context = query({"inputs": context})
-    summarized_context = summarized_context[0]['summary_text']
+    summarized_context = [query({"inputs": context})[0]['summary_text'] for context in contexts]
     
-    question_clip_input = clip_processor(text=[question], images=Image.open(random_img_for_clip), return_tensors="pt", padding=True)
-    question_clip_output = clip_model(**question_clip_input)
+    chatbot_question_clip_input = clip_processor(text=chatbot_questions, images=[Image.open(random_img_for_clip)]*len(chatbot_questions), return_tensors="pt", padding=True)
+    chatbot_question_clip_output = clip_model(**chatbot_question_clip_input)
 
-    context_clip_input = clip_processor(text=[summarized_context], images=Image.open(random_img_for_clip), return_tensors="pt", padding=True)
+    context_clip_input = clip_processor(text=summarized_context, images=[Image.open(random_img_for_clip)]*len(contexts), return_tensors="pt", padding=True)
     context_clip_output = clip_model(**context_clip_input)
 
-    np.save(training_question_features, question_clip_output.text_embeds.detach().numpy())
+    class_question_clip_input = clip_processor(text=class_questions, images=[Image.open(random_img_for_clip)]*len(class_questions), return_tensors="pt", padding=True)
+    class_question_clip_output = clip_model(**class_question_clip_input)
+
+    np.save(training_chatbot_question_features, chatbot_question_clip_output.text_embeds.detach().numpy())
     np.save(training_context_features, context_clip_output.text_embeds.detach().numpy())
+    np.save(training_class_question_features, class_question_clip_output.text_embeds.detach().numpy())
     
     
 if __name__ == "__main__":

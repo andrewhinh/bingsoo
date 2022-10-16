@@ -18,11 +18,13 @@ from transformers import CLIPProcessor, CLIPModel
 load_dotenv()
 HF_TOKEN = os.getenv("HF_TOKEN")
 openai.api_key = os.getenv("OPENAI_API_KEY")
+API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
+headers = {"Authorization": f"Bearer {HF_TOKEN}"}
 
 # OpenAI GPT-3 config
 context_id = 100  # Random
 question_id = 1005  # Random
-n_shot = 1
+n_shot = 16
 n_ensemble = 1
 gpt_max_tokens = 4097
 
@@ -31,13 +33,14 @@ encoder = "openai/clip-vit-base-patch16"
 
 # Context files
 parent_dir = Path(__file__).resolve().parents[0] / "context"
-training_train_idx_file = parent_dir / "train_idx.json"
-training_context_file = parent_dir / "context.json"
-training_question_features = parent_dir / "question_feature.npy"
-training_context_features = parent_dir / "context_feature.npy"
-training_question_file = parent_dir / "question.json"
-training_answer_file = parent_dir / "answer.json"
 random_img_for_clip = parent_dir / "img.jpg"
+chatbot_dir = "chatbot"
+training_idx_file = parent_dir / chatbot_dir / "train_idx.json"
+training_context_file = parent_dir / chatbot_dir / "context.json"
+training_question_features = parent_dir / chatbot_dir / "question_feature.npy"
+training_context_features = parent_dir / chatbot_dir / "context_feature.npy"
+training_question_file = parent_dir / chatbot_dir / "question.json"
+training_answer_file = parent_dir / chatbot_dir / "answer.json"
 
 
 # Main functions/classes
@@ -90,8 +93,9 @@ class Reply:
         if context_key_list is None:
             context_key = self.train_keys[random.randint(0, len(self.train_keys) - 1)]
         else:
-            context_key = context_key_list[ni + n_shot - 1]
+            context_key = context_key_list[ni]
         context_id_key = int(context_key.split("<->")[0])
+
         while True:  # make sure get context with valid question and answer
             if (
                 len(self.traincontext_question_dict[context_key]) != 0
@@ -105,8 +109,7 @@ class Reply:
                 random.randint(
                     0,
                     len(self.traincontext_context_dict[context_id_key]) - 1,
-                )
-            ]
+                )]
         )
         prompt += "You: %s\nMarv: %s\n" % (
             self.traincontext_question_dict[context_key],
@@ -146,7 +149,7 @@ class Reply:
       self.val_feature = question_feature
       self.train_idx = json.load(
           open(
-              training_train_idx_file,
+              training_idx_file,
               "r",
           )
       )
@@ -192,19 +195,17 @@ class Reply:
     return context_dict, answer_dict, question_dict
 
 
-class Pipeline:
+class Answer:
     """
   Main inference class
   """
 
     def __init__(self):
-        self.API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
-        self.headers = {"Authorization": f"Bearer {HF_TOKEN}"}
         self.clip_model = CLIPModel.from_pretrained(encoder)
         self.clip_processor = CLIPProcessor.from_pretrained(encoder)
 
     def query(self, payload):
-        response = requests.post(self.API_URL, headers=self.headers, json=payload)
+        response = requests.post(API_URL, headers=headers, json=payload)
         return response.json()
 
     def shorten_context(self, context, context_type):
@@ -212,7 +213,7 @@ class Pipeline:
             "inputs": context,
         })
         summarized_context = summarized_context[0]['summary_text']
-        max_tokens = 512
+        max_tokens = 128
         prompt = "Extract the exam dates, keywords, and names from this :"
         prompt += context_type + "\n\n"
         prompt += context[:gpt_max_tokens - max_tokens]
@@ -257,13 +258,12 @@ def main():
     # Inputs
     parser.add_argument("--question", type=str, required=True)
     parser.add_argument("--context", type=str, required=True)
+    parser.add_argument("--context_type", type=str, required=True)
     args = parser.parse_args()
 
     # Answering question
-    pipeline = Pipeline()
-    answer = pipeline.predict(args.question, args.context)
-    print(answer)
-    return answer
+    answer = Answer()
+    return answer.predict(args.question, args.context, args.context_type)
 
 
 if __name__ == "__main__":
