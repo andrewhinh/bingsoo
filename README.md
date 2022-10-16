@@ -2,7 +2,7 @@
 A Canvas-integrated Discord bot for coursework management.
 
 ## Notes
-- Marv, our chatbot, can currently answer questions about your syllabus. Anything further, and he'll make something up to appease us (we're watching you Marv).
+- Marv, our chatbot, can currently answer questions about your syllabus and assignments. Anything further, and he'll make something up to appease us (we're watching you Marv).
 
 ## Credit
 - HuggingFace for their [text summarization model](https://huggingface.co/facebook/bart-large-cnn).
