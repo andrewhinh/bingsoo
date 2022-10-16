@@ -1,6 +1,5 @@
 # Import the Canvas class
 from canvasapi import Canvas
-
 import requests
 
 from pprint import pprint
@@ -18,22 +17,34 @@ canvas = Canvas(API_URL, API_KEY)
 courses = canvas.get_courses(enrollment_state="active")
 midterms = []
 essays = []
-
+syllabuses = []
 for course in courses:
   # pprint(course.name)
-  courseAssignments = course.get_assignments()
-  pprint(courseAssignments)
-  for assignment in courseAssignments:
-    if 'Midterm' in str(assignment): 
-      midterms.append(course.get_assignment(assignment))
-    elif  'Essay' in str(assignment):
-      essays.append(course.get_assignment(assignment))
+  try:
+    files = course.get_files()
+    # print(files, course)
+    for file in files:
+      if 'syllabus' in file.display_name.lower():
+        print(file.display_name, "file")
+        pdf = requests.get(file.url)
+        # open(f'./{file.display_name.lower()}', "wb").write(pdf.content)
+        syllabuses += (file.url, course.name)
+  except:
+    print("error", course)
+  # courseAssignments = course.get_assignments()
+  # pprint(courseAssignments)
+  # for assignment in courseAssignments:
+  #   if 'Midterm' in str(assignment).lower(): 
+  #     midterms.append(assignment)
+  #   elif 'Essay' in str(assignment).lower():
+  #     essays.append(assignment)
+    
+print(syllabuses)
+# for midterm in midterms:
+#   print(midterm.due_at, "midterm")
 
-for midterm in midterms:
-  print(midterm.due_at, "midterm")
-
-for essay in essays:
-  print(essay.due_at, "essay")
+# for essay in essays:
+#   print(essay.due_at, "essay")
 # announcements = canvas.get_announcements(list(courses))
 # for announcement in announcements:
 #   pprint(announcement)
