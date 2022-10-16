@@ -9,7 +9,7 @@ load_dotenv(override=True)
 from datetime import datetime
 import asyncio
 import discord
-from .utils import *
+from .utils import ChooseClasses, ChooseAssignments, convert_to_item
 
 class CommandsCog(commands.Cog):
     get_commands = discord.SlashCommandGroup(
@@ -20,6 +20,7 @@ class CommandsCog(commands.Cog):
         'choose',
         "Commands used to get various information about the bot."
     )
+
 
     @get_commands.command(
         name='courses',
@@ -48,42 +49,50 @@ class CommandsCog(commands.Cog):
         # TODO: fetch API creds based on who used it!
         canvas = Canvas(API_URL, API_KEY)
         courses = canvas.get_courses(enrollment_state='active')
-
-        # await ctx.respond("dfsd")
-        # await ctx.respond(f"**Assignments**:\n{chr(10).join(map(lambda course: f"{course!s} {chr(10).join(map(str, course.get_assigment()))}", courses))}")
-        assignments = []
         assignment_dict = {}
 
-        counter = 0
-        for course in courses:
-            # assignment_str += f"__{course!s}__"
-            print(course)
-            assignment_dict[course.name] = {}
-            for assignment in course.get_assignments():
-                try:
-                    assdate = datetime.fromisoformat(assignment.due_at[0:-1])
-                except TypeError as e:
-                    pass
-                if assdate >= datetime.now():
-                    counter+=1
-                    temp_dict = {}
-                    temp_dict['course'] = course.name
-                    temp_dict['assignment_name'] = assignment.name
-                    temp_dict['assignment_date'] = assdate
-                    assignment_dict[course.name] = temp_dict
-            if counter == 0:
-                assignment_dict.pop(course.name, None)
-            counter = 0
+        choice_courses = canvas.get_courses(enrollment_state='active')
+        choose_classes = ChooseAssignments(list(map(str, choice_courses)))
+        choose_classes._selected_values = list(map(str, choice_courses))
+        ready = asyncio.Event()
+        view = discord.ui.View(choose_classes)
+        @convert_to_item
+        @discord.ui.button(label="Submit", style=discord.ButtonStyle.success, row=1)
+        async def submit_button(button, interaction):
+            view.disable_all_items()
+            await interaction.message.edit(content="Choose which classes to show assignments from", view=view)
+            ready.set()
+        view.add_item(submit_button)
+        await ctx.respond("Choose which classes to show assignments from", view=view)
+        await ready.wait()
+        print(choose_classes.values)
+        # for course in choice_courses:
+        #     print(course.name)
+        string_assignment = ""
+        for course in choice_courses:
+            # print(course.name)
+            for i in range(len(choose_classes.values)):
+                if course.name in choose_classes.values[i]:
+                    # await ctx.respond(course.)
+                    for assignment in course.get_assignments():
+                        try:
+                            assdate = datetime.fromisoformat(assignment.due_at[0:-1])
+                        except TypeError as e:
+                            pass
+                        if assdate >= datetime.now():
+                            string_assignment += f"{assignment.name} due at {str(assdate)}\n"
+                            # await ctx.respond(assignment.name + " due at " + str(assdate))
+            # if course.name in choose_classes.values:
+            #     print(course)
 
-            print(assignment_dict)
-            # print(assignment_str)
-        await ctx.send("fdsfd")
+        await ctx.respond(string_assignment)
+        # await ctx.respond('after button is pressed :)')
 
     @choose_commands.command()
     async def classes(self, ctx):
         API_URL = "https://ucmerced.instructure.com/"
         # Canvas API key
-        PI_KEY = os.environ['CANVAS_API_KEY']
+        API_KEY = os.environ['CANVAS_API_KEY']
         # TODO: fetch API creds based on who used it!
         canvas = Canvas(API_URL, API_KEY)
         # courses = canvas.get_courses(enrollment_state='active')
@@ -91,16 +100,32 @@ class CommandsCog(commands.Cog):
         choose_classes = ChooseClasses(list(map(str, canvas.get_courses(enrollment_state='active'))))
         ready = asyncio.Event()
         # @discord.ui.button(label="Submit", style=discord.ButtonStyle.success, emoji="✔")
+        view = discord.ui.View(choose_classes)
+        @convert_to_item
         @discord.ui.button(label="Submit", style=discord.ButtonStyle.success, row=1)
-        async def submit_button(view, button, interaction):
+        async def submit_button(button, interaction):
             view.disable_all_items()
             await interaction.message.edit(content="Choose the classes you want announced", view=view)
             await interaction.response.send_message("Classes saved!")
             ready.set()
-        await ctx.respond("Choose the classes you want announced", view=ViewWithItemCallbackType(choose_classes, item_callback_type=[submit_button]))
+        view.add_item(submit_button)
+        await ctx.respond("Choose the classes you want announced", view=view)
         await ready.wait()
-        await ctx.respond('after button is pressed :)')
+        # await ctx.respond('after button is pressed :)')
         # Do stuff after the button is pressed
         # await ctx.interaction.edit_original_message(
         #     ctx.respond("")
         # )
+    
+    @commands.slash_command(
+        description="Ask me a question about your homework!",
+        options=[
+            Option(
+                str,
+                name='question',
+                description='Type your question here.'
+            )
+        ]
+    )
+    async def ask(self, ctx: discord.ApplicationContext, question: str):
+        await ctx.respond(f'This again? The exam is on Wednesday, 10/12/2022 from 1:30 pm - 2:45 am in COB2-140. Please take note of this in the future.')
