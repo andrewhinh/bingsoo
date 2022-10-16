@@ -1,2 +1,4 @@
 py-cord==2.2.2
 canvasapi==3.0.0
+openai==0.23.1
+python-dotenv==0.21.0
