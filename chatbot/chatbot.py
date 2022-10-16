@@ -207,15 +207,18 @@ class Pipeline:
         response = requests.post(self.API_URL, headers=self.headers, json=payload)
         return response.json()
 
-    def shorten_context(self, context):
+    def shorten_context(self, context, context_type):
         summarized_context = self.query({
             "inputs": context,
         })
         summarized_context = summarized_context[0]['summary_text']
         max_tokens = 512
+        prompt = "Extract the exam dates, keywords, and names from this :"
+        prompt += context_type + "\n\n"
+        prompt += context[:gpt_max_tokens - max_tokens]
         response = openai.Completion.create(
             model="text-davinci-002",
-            prompt="Extract the exam dates, keywords, and names from this syllabus:\n\n"+context[:gpt_max_tokens - max_tokens],
+            prompt=prompt,
             temperature=0,
             max_tokens=max_tokens,
             top_p=1.0,
@@ -224,8 +227,8 @@ class Pipeline:
         )
         return summarized_context, summarized_context + process_answer(response["choices"][0]["text"])
     
-    def predict(self, question, context):
-        basic_summary, enhanced_summary = self.shorten_context(context)
+    def predict(self, question, context, context_type):
+        basic_summary, enhanced_summary = self.shorten_context(context, context_type)
 
         # Generating features
         question_clip_input = self.clip_processor(text=[question], images=Image.open(random_img_for_clip), return_tensors="pt", padding=True)
