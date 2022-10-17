@@ -3,6 +3,11 @@ from discord.commands import Option
 from canvasapi import Canvas
 from dotenv import load_dotenv
 import os
+from .chatbot.context_type import FindType
+# from chatbot.context_type import FindType
+from .chatbot.utils.get_context import getSyllabuses, getAssignments
+from .chatbot.chatbot import Answer
+
 
 load_dotenv(override=True)
 
@@ -128,4 +133,11 @@ class CommandsCog(commands.Cog):
         ]
     )
     async def ask(self, ctx: discord.ApplicationContext, question: str):
-        await ctx.respond(f'This again? The exam is on Wednesday, 10/12/2022 from 1:30 pm - 2:45 am in COB2-140. Please take note of this in the future.')
+        # ready = asyncio.Event()
+        CONTEXT_TYPE = FindType().predict(question)
+        CONTEXT = getAssignments() #getSyllabuses() if CONTEXT_TYPE=="syllabus" else getAssignments()
+        ANSWER = Answer().predict(question, CONTEXT, CONTEXT_TYPE)
+        print(ANSWER)
+        await ctx.send(ANSWER)
+        # await ready.wait()
+        # await ctx.respond(f'This again? The exam is on Wednesday, 10/12/2022 from 1:30 pm - 2:45 am in COB2-140. Please take note of this in the future.')

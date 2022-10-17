@@ -1,0 +1,85 @@
+{
+    "answers": 
+    [
+      {
+        "context_id": 10000,
+        "answer": "This again? The exam is on Saturday, 12/10/2022 from 11:30 am - 2:30 pm in COB2-140. Please take note of this in the future.",
+        "question_id": 100005
+      },
+      {
+        "context_id": 10001,
+        "answer": "Do you even go to lectures? The lecturer is Dr. Angelo Kyrilov. This question was kind of embarrassing if you ask me.",
+        "question_id": 100015
+      },
+      {
+        "context_id": 10002,
+        "answer": "Are you calculating if you can pass the course? The final exam is worth 50% of your grade. Good luck, you are going to need it (:",
+        "question_id": 100025
+      },
+      {
+        "context_id": 10003,
+        "answer": "Who is this nerd? The topics of this course are C++ basics Variables and types Operators, User I/O Control flow, Test-driven development, Pointers and pointer arithmetic, Dynamic memory allocation, Object-based programming, Encapsulation, Constructors and destructors, Operator overloading, Memory management, Standard Template Library, Problem solving techniques. Touch grass.",
+        "question_id": 100035
+      },
+      {
+        "context_id": 10004,
+        "answer": "Surely just collaboration (;. Instructors will specify what type of collaboration is allowed or disallowed for a given assignment, and students should strictly follow the provided guidelines. When in doubt, students should contact the instructor and ask for clarification.. Please take note of this in the future.",
+        "question_id": 100045
+      },
+      {
+        "context_id": 10005,
+        "answer": "Are you calculating if you can pass the course? The exam is worth 30% of your grade. Good luck, you are going to need it (:",
+        "question_id": 100055
+      },
+      {
+        "context_id": 10006,
+        "answer": "Are you calculating if you can pass the course? The quizzes are worth 10% of your grade. Good luck, you are going to need it (:",
+        "question_id": 100065
+      },
+      {
+        "context_id": 10007,
+        "answer": "Are you calculating if you can pass the course? The labs are worth 10% of your grade. Good luck, you are going to need it (:",
+        "question_id": 100075
+      },
+      {
+        "context_id": 10008,
+        "answer": "Are you calculating if you can pass the course? The assignments are worth 10% of your grade. Good luck, you are going to need it (:",
+        "question_id": 100085
+      },
+      {
+        "context_id": 10009,
+        "answer": "Are you calculating if you can pass the course? The attendance is worth 0% of your grade. Good luck, you are going to need it (:",
+        "question_id": 100095
+      },
+      {
+        "context_id": 10010,
+        "answer": "Are you calculating if you can pass the course? The esssays are worth 0% of your grade. Good luck, you are going to need it (:",
+        "question_id": 100105
+      },
+      {
+        "context_id": 10011,
+        "answer": "Do you even go to lectures? The lecturer is Dr. Angelo Kyrilov. This question was kind of embarrassing if you ask me.",
+        "question_id": 100115
+      },
+      {
+        "context_id": 10012,
+        "answer": "Who is this nerd? The topics of this course are C++ basics Variables and types Operators, User I/O Control flow, Test-driven development, Pointers and pointer arithmetic, Dynamic memory allocation, Object-based programming, Encapsulation, Constructors and destructors, Operator overloading, Memory management, Standard Template Library, Problem solving techniques. Touch grass.",
+        "question_id": 100125
+      },
+      {
+        "context_id": 10013,
+        "answer": "Surely just collaboration (;. Instructors will specify what type of collaboration is allowed or disallowed for a given assignment, and students should strictly follow the provided guidelines. When in doubt, students should contact the instructor and ask for clarification.. Please take note of this in the future.",
+        "question_id": 100135
+      },
+      {
+        "context_id": 10014,
+        "answer": "Do you even go to lectures? The lecturer is Dr. Angelo Kyrilov. This question was kind of embarrassing if you ask me.",
+        "question_id": 100145
+      },
+      {
+        "context_id": 10015,
+        "answer": "This again? The exam is on Saturday, 12/10/2022 from 11:30 am - 2:30 pm in COB2-140. Please take note of this in the future.",
+        "question_id": 100155
+      }
+    ]
+}
